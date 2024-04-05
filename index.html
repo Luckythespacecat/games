@@ -27,16 +27,16 @@
     </form>
 
     <script>
-        // Initialize Firebase
-        const firebaseConfig = {
-            apiKey: "AIzaSyDgJEi4nQJl7Y17zZgjQhc3ABKopF4dAJE",
-            authDomain: "logged-81b54.firebaseapp.com",
-            projectId: "logged-81b54",
-            storageBucket: "logged-81b54.appspot.com",
-            messagingSenderId: "25734742650",
-            appId: "1:25734742650:web:18f7705c0a6ed02b2c31c3",
-            measurementId: "G-PQ0R1DDTKC"
-        };
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyDgJEi4nQJl7Y17zZgjQhc3ABKopF4dAJE",
+  authDomain: "logged-81b54.firebaseapp.com",
+  projectId: "logged-81b54",
+  storageBucket: "logged-81b54.appspot.com",
+  messagingSenderId: "25734742650",
+  appId: "1:25734742650:web:18f7705c0a6ed02b2c31c3",
+  measurementId: "G-PQ0R1DDTKC"
+};
         firebase.initializeApp(firebaseConfig);
 
         document.getElementById('gameForm').addEventListener('submit', function(event) {
@@ -52,27 +52,37 @@
             var storageRef = firebase.storage().ref('games/' + gameFile.name);
             var uploadTask = storageRef.put(gameFile);
 
-            // Handle successful upload
-            uploadTask.then(snapshot => {
-                console.log('File uploaded successfully');
-                // Get download URL
-                storageRef.getDownloadURL().then(downloadURL => {
-                    // Create new page with game details
-                    var newPageContent = `
-                        <h1>${gameTitle}</h1>
-                        <p>${gameDescription}</p>
-                        <p>Play the game <a href="${gameEndingURL}">here</a></p>
-                        <iframe src="${downloadURL}" width="800" height="600"></iframe>
-                    `;
-
-                    var newPage = window.open();
-                    newPage.document.open();
-                    newPage.document.write(newPageContent);
-                    newPage.document.close();
-                });
-            }).catch(error => {
-                console.error('Error uploading file:', error);
-            });
+            // Listen for state changes, errors, and completion of the upload.
+            uploadTask.on('state_changed', 
+                function(snapshot){
+                    // Observe state change events such as progress, pause, and resume
+                    // Get upload progress
+                    var progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                    console.log('Upload is ' + progress + '% done');
+                }, 
+                function(error) {
+                    // Handle unsuccessful uploads
+                    console.error('Error uploading file:', error);
+                }, 
+                function() {
+                    // Handle successful upload
+                    console.log('File uploaded successfully');
+                    // Get download URL
+                    storageRef.getDownloadURL().then(downloadURL => {
+                        // Create new page with game details
+                        var newPageContent = `
+                            <h1>${gameTitle}</h1>
+                            <p>${gameDescription}</p>
+                            <p>Play the game <a href="${gameEndingURL}">here</a></p>
+                            <iframe src="${downloadURL}" width="800" height="600"></iframe>
+                        `;
+                        var newPage = window.open();
+                        newPage.document.open();
+                        newPage.document.write(newPageContent);
+                        newPage.document.close();
+                    });
+                }
+            );
         });
     </script>
 </body>
