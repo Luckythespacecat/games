@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Maker</title>
+    <!-- Add Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.0.2/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.2/firebase-storage.js"></script>
+</head>
+<body>
+    <h1>Create Your Game</h1>
+    <form id="gameForm">
+        <label for="gameTitle">Game Title:</label><br>
+        <input type="text" id="gameTitle" name="gameTitle"><br><br>
+
+        <label for="gameDescription">Game Description:</label><br>
+        <textarea id="gameDescription" name="gameDescription" rows="4" cols="50"></textarea><br><br>
+
+        <label for="gameEndingURL">Game Ending URL:</label><br>
+        <input type="text" id="gameEndingURL" name="gameEndingURL"><br><br>
+
+        <label for="gameFile">Upload Game (ZIP file):</label><br>
+        <input type="file" id="gameFile" name="gameFile"><br><br>
+
+        <input type="submit" value="Submit">
+    </form>
+
+    <script>
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyDgJEi4nQJl7Y17zZgjQhc3ABKopF4dAJE",
+  authDomain: "logged-81b54.firebaseapp.com",
+  projectId: "logged-81b54",
+  storageBucket: "logged-81b54.appspot.com",
+  messagingSenderId: "25734742650",
+  appId: "1:25734742650:web:18f7705c0a6ed02b2c31c3",
+  measurementId: "G-PQ0R1DDTKC"
+};
+        firebase.initializeApp(firebaseConfig);
+
+        document.getElementById('gameForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            // Get form data
+            var gameTitle = document.getElementById('gameTitle').value;
+            var gameDescription = document.getElementById('gameDescription').value;
+            var gameEndingURL = document.getElementById('gameEndingURL').value;
+            var gameFile = document.getElementById('gameFile').files[0];
+
+            // Upload game file to Firebase Storage
+            var storageRef = firebase.storage().ref('games/' + gameFile.name);
+            var uploadTask = storageRef.put(gameFile);
+
+            // Handle successful upload
+            uploadTask.then(snapshot => {
+                console.log('File uploaded successfully');
+                // Get download URL
+                storageRef.getDownloadURL().then(downloadURL => {
+                    // Create new page with game details
+                    var newPageContent = `
+                        <h1>${gameTitle}</h1>
+                        <p>${gameDescription}</p>
+                        <p>Play the game <a href="${gameEndingURL}">here</a></p>
+                        <iframe src="${downloadURL}" width="800" height="600"></iframe>
+                    `;
+
+                    var newPage = window.open();
+                    newPage.document.open();
+                    newPage.document.write(newPageContent);
+                    newPage.document.close();
+                });
+            }).catch(error => {
+                console.error('Error uploading file:', error);
+            });
+        });
+    </script>
+</body>
+</html>
